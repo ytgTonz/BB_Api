@@ -1,0 +1,28 @@
+# Routes:
+User Authentication:
+	Registration endpoint (POST /api/register)
+	Login endpoint (POST /api/login)	
+	Logout endpoint (GET /api/logout)
+Booking Management:
+	Get user's bookings (GET /api/bookings)
+	Create new booking (POST /api/bookings)
+	Update booking (PUT /api/bookings/<booking_id>)
+	Delete booking (DELETE /api/bookings/<booking_id>)
+
+Examples:
+	POST /api/register
+{
+    "username": "john_doe",
+    "email": "john@example.com",
+    "password": "secure_password",
+    "company": "Acme Corp"
+    "department": "HR"
+}
+
+	POST /api/bookings
+	{
+    	    "room_id": "room1",
+	    "start_time": "2024-03-20T10:00:00",
+	    "end_time": "2024-03-20T11:00:00",
+	    "purpose": "Team Meeting"
+	}
