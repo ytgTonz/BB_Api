@@ -21,8 +21,53 @@ Examples:
 
 	POST /api/bookings
 	{
-    	    "room_id": "room1",
+    	"room_id": "room1",
 	    "start_time": "2024-03-20T10:00:00",
 	    "end_time": "2024-03-20T11:00:00",
 	    "purpose": "Team Meeting"
 	}
+
+POST /api/login
+Headers:
+  Content-Type: application/json
+Body:
+{
+    "email": "test@example.com",
+    "password": "password123"
+}
+
+POST /api/rooms
+Headers:
+  Content-Type: application/json
+Body:
+{
+    "name": "Conference Room A",
+    "capacity": 10,
+    "facilities": ["projector", "whiteboard"],
+    "floor": "1st"
+}
+
+POST /api/bookings
+Headers:
+  Content-Type: application/json
+Body:
+{
+    "room_id": "room_id_from_previous_response",
+    "start_time": "2024-03-20T10:00:00",
+    "end_time": "2024-03-20T11:00:00",
+    "purpose": "Team Meeting",
+    "attendees": ["user1@example.com", "user2@example.com"]
+}
+
+GET /api/bookings
+
+PUT /api/bookings/booking_id_here
+Headers:
+  Content-Type: application/json
+Body:
+{
+    "start_time": "2024-03-20T14:00:00",
+    "end_time": "2024-03-20T15:00:00",
+    "purpose": "Updated Meeting"
+}
+
