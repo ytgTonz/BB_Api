@@ -65,14 +65,17 @@ def logout():
 
 @api_bp.route("/profile", methods=['GET'])
 def get_profile():
-    token = check_jwt()
-    email = jwt.decode(token, SECRET_KEY, algorithms="HS256")
-    print(email)
-    data = request.get_json()
-    user_data = mongo.db.users.find_one({"email": data["email"]})
-    user = User.from_dict(user_data)
-    if user:
-     return jsonify(user.to_dict())
+    if request.method == 'GET':
+
+        token = check_jwt()
+        if token:
+            print(token)
+            email = jwt.decode(token, SECRET_KEY, algorithms="HS256")
+            print(email)
+            user_data = mongo.db.users.find_one(email)
+            user = User.from_dict(user_data)
+            if user:
+                return jsonify(user.to_dict())
 
 @api_bp.route("/profile", methods=['PUT'])
 def update_profile():
