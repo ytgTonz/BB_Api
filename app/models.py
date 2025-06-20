@@ -10,7 +10,6 @@ class User(UserMixin):
         self.company = company
         self.role = role
         self.department = department
-        self._id = None
         if password:
             self.password_hash = generate_password_hash(password)
 

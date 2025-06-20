@@ -4,14 +4,13 @@ from app.database import mongo, init_db
 from app.models import User
 from app.routes import api_bp
 from bson.objectid import ObjectId
-
+import os
 
 def create_app():
     app = Flask(__name__)
     
     # Configuration
-    app.config["SECRET_KEY"] = "your-secret-key"  # Change this in production
-    
+    app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
     # Initialize MongoDB
     init_db(app)
     

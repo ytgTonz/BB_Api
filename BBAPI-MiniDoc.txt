@@ -1,3 +1,6 @@
+
+URL-Main: https://bb-api-lmgy.onrender.com
+
 # Routes:
 User Authentication:
 	Registration endpoint (POST /api/register)
@@ -10,7 +13,7 @@ Booking Management:
 	Delete booking (DELETE /api/bookings/<booking_id>)
 
 Examples:
-	POST /api/register
+(1)	POST /api/register
 {
     "username": "john_doe",
     "email": "john@example.com",
@@ -19,7 +22,7 @@ Examples:
     "department": "HR"
 }
 
-	POST /api/bookings
+(2)	POST /api/bookings
 	{
     	"room_id": "room1",
 	    "start_time": "2024-03-20T10:00:00",
@@ -27,7 +30,7 @@ Examples:
 	    "purpose": "Team Meeting"
 	}
 
-POST /api/login
+(3) POST /api/login
 Headers:
   Content-Type: application/json
 Body:
@@ -36,7 +39,7 @@ Body:
     "password": "password123"
 }
 
-POST /api/rooms
+(4)POST /api/rooms
 Headers:
   Content-Type: application/json
 Body:
@@ -47,7 +50,7 @@ Body:
     "floor": "1st"
 }
 
-POST /api/bookings
+(5)POST /api/bookings
 Headers:
   Content-Type: application/json
 Body:
@@ -59,7 +62,7 @@ Body:
     "attendees": ["user1@example.com", "user2@example.com"]
 }
 
-GET /api/bookings
+(6)GET /api/bookings
 
 PUT /api/bookings/booking_id_here
 Headers:
