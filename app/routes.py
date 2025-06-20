@@ -16,11 +16,7 @@ def check_jwt():
      auth_header = request.headers.get('Authorization')
      if auth_header and auth_header.startswith('Bearer '):
       token = auth_header.split(' ')[1]
-     if encoded == token:
-        print("OKAY")
-        return True
-     else:
-         return False
+     return token
 
 
 # User Authentication 
@@ -59,7 +55,7 @@ def login():
     #login_user(user)
     encoded = jwt.encode({"email": data['email']}, SECRET_KEY, algorithm="HS256")
 
-    return jsonify({"message": "Login successful", "user": user.to_dict(), "jwt_token": encoded})
+    return jsonify({"message": "Login successful",  "jwt_token": encoded})
 
 @api_bp.route("/logout")
 def logout():
@@ -69,8 +65,14 @@ def logout():
 
 @api_bp.route("/profile", methods=['GET'])
 def get_profile():
-    if decode:
-     return jsonify(current_user.to_dict())
+    token = check_jwt()
+    email = jwt.decode(token, SECRET_KEY, algorithms="HS256")
+    print(email)
+    data = request.get_json()
+    user_data = mongo.db.users.find_one({"email": data["email"]})
+    user = User.from_dict(user_data)
+    if user:
+     return jsonify(user.to_dict())
 
 @api_bp.route("/profile", methods=['PUT'])
 def update_profile():
