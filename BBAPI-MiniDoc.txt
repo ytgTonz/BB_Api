@@ -13,24 +13,28 @@ Booking Management:
 	Delete booking (DELETE /api/bookings/<booking_id>)
 
 Examples:
-(1)	POST /api/register
+(0)	POST /api/register/admin
+{
+    "username": "john manager",
+    "email": "john@admin.com",
+    "password": "secure_password",
+    "company": "Acme Corp"
+    "department": "IT"
+    "type": "Admin"
+}
+
+(1)	POST /api/register/user
 {
     "username": "john_doe",
     "email": "john@example.com",
     "password": "secure_password",
     "company": "Acme Corp"
     "department": "HR"
+    "type": "User"
 }
 
-(2)	POST /api/bookings
-	{
-    	"room_id": "room1",
-	    "start_time": "2024-03-20T10:00:00",
-	    "end_time": "2024-03-20T11:00:00",
-	    "purpose": "Team Meeting"
-	}
 
-(3) POST /api/login
+(2) POST /api/login
 Headers:
   Content-Type: application/json
 Body:
@@ -39,7 +43,7 @@ Body:
     "password": "password123"
 }
 
-(4)POST /api/rooms
+(3)POST /api/rooms
 Headers:
   Content-Type: application/json
 Body:
@@ -50,7 +54,7 @@ Body:
     "floor": "1st"
 }
 
-(5)POST /api/bookings
+(4)POST /api/bookings
 Headers:
   Content-Type: application/json
 Body:
@@ -62,7 +66,7 @@ Body:
     "attendees": ["user1@example.com", "user2@example.com"]
 }
 
-(6)GET /api/bookings
+(5)GET /api/bookings
 
 PUT /api/bookings/booking_id_here
 Headers:
@@ -74,7 +78,7 @@ Body:
     "purpose": "Updated Meeting"
 }'
 
-(7) GET /api/profile
+(6) GET /api/profile
 Headers:
 	Authorization: [jwt_token]
 Body

@@ -1,4 +1,4 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, g
 from flask_login import login_user, logout_user, current_user, login_required
 from bson.objectid import ObjectId
 from app.database import mongo
@@ -12,19 +12,31 @@ api_bp = Blueprint("api", __name__)
 SECRET_KEY = os.getenv('SECRET_KEY')
 encoded = None
 decode =None
-def check_jwt():
-     auth_header = request.headers.get('Authorization')
-     if auth_header and auth_header.startswith('Bearer '):
-      token = auth_header.split(' ')[1]
-     return token
 
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            g.user = data
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return jsonify({"message": "Invalid Token"}), 403
+        return f(*args, **kwargs)
+    return decorated
+        
+        
 
 # User Authentication 
-@api_bp.route("/register", methods=['POST'])
-def register():
+@api_bp.route("/register/user", methods=['POST'])
+def register_user():
     data = request.get_json()
     
-    # Check if user already exists
     if mongo.db.users.find_one({"email": data["email"]}):
         return jsonify({"error": "Email already registered"}), 400
     
@@ -33,11 +45,30 @@ def register():
         email=data["email"],
         password=data["password"],
         company=data.get("company"),
-        department=data.get("department")
+        department=data.get("department"),
+        type = data.get("type")
     )
     
     result = mongo.db.users.insert_one(user.__dict__)
     return jsonify({"message": "User registered successfully", "user_id": str(result.inserted_id)}), 201
+
+@api_bp.route("register/admin", methods=['POST'])
+def register_admin():
+      data  = request.json()
+      if mongo.db.users.find_one({"email": data["email"]}):
+        return jsonify({"error": "Email already registered"}), 400
+      
+      admin = User(
+        username=data["username"],
+        email=data["email"],
+        password=data["password"],
+        company=data.get("company"),
+        department=data.get("department"),
+        type = data.get("type")
+      )
+      result = mongo.db.users.insert_one(admin.__dict__)
+      return jsonify({"message": "Admin registered successfully", "user_id": str(result.inserted_id)}), 201    
+      
 
 @api_bp.route("/login", methods=['POST'])
 def login():
@@ -52,85 +83,82 @@ def login():
     if not chk_pass:
         return jsonify({"error": "Invalid password"}), 401 
     
-    #login_user(user)
     encoded = jwt.encode({"email": data['email']}, SECRET_KEY, algorithm="HS256")
 
     return jsonify({"message": "Login successful",  "jwt_token": encoded})
 
 @api_bp.route("/logout")
+@token_required
 def logout():
-    if decode:
-     logout_user()
-     return jsonify({"message": "Logout successful"})
+    logout_user()
+    return jsonify({"message": "Logout successful"})
 
 @api_bp.route("/profile", methods=['GET'])
+@token_required
 def get_profile():
     if request.method == 'GET':
-
-        token = check_jwt()
-        if token:
-            print(token)
-            email = jwt.decode(token, SECRET_KEY, algorithms="HS256")
-            print(email)
-            user_data = mongo.db.users.find_one(email)
-            user = User.from_dict(user_data)
-            if user:
-                return jsonify(user.to_dict())
+        email = g.user.get('email')
+        user_data = mongo.db.users.find_one({'email': email})
+        user = User.from_dict(user_data)
+        if user:
+            return jsonify(user.to_dict())
+        return jsonify({'error': 'User not found'}), 404
 
 @api_bp.route("/profile", methods=['PUT'])
+@token_required
 def update_profile():
-    if decode:
-        data = request.get_json()
-        update_data = {
-            "username": data.get("username"),
-            "company": data.get("company"),
-            "department": data.get("department")
-        }
-        
-        mongo.db.users.update_one(
-            {"_id": ObjectId(current_user.get_id())},
-            {"$set": update_data}
-        )
+    data = request.get_json()
+    update_data = {
+        "username": data.get("username"),
+        "company": data.get("company"),
+        "department": data.get("department")
+    }
+    email = g.user.get('email')
+    user_data = mongo.db.users.find_one({'email': email})
+    if not user_data:
+        return jsonify({'error': 'User not found'}), 404
+    user = User.from_dict(user_data)
+    mongo.db.users.update_one(
+        {"_id": user._id},
+        {"$set": update_data}
+    )
     return jsonify({"message": "Profile updated successfully"})
 
 # Room Management Routes
 @api_bp.route("/rooms", methods=['GET'])
+@token_required
 def get_rooms():
-    if decode:
-        rooms = mongo.db.rooms.find({"is_active": True})
-        return jsonify([Room.from_dict(room).to_dict() for room in rooms])
+    rooms = mongo.db.rooms.find({"is_active": True})
+    return jsonify([Room.from_dict(rooms).to_dict() for room in rooms])
 
 @api_bp.route("/rooms", methods=['POST'])
+@token_required
 def create_room():
-    if decode:
-        data = request.get_json()
-        print(str(data))
-        room = Room(
-            name=data["name"],
-            capacity=data["capacity"],
-            facilities=data.get("facilities", []),
-            floor=data.get("floor")
-        )
-        
-        result = mongo.db.rooms.insert_one(room.to_dict())
+    data = request.get_json()
+    room = Room(
+        name=data["name"],
+        capacity=data["capacity"],
+        facilities=data.get("facilities", []),
+        floor=data.get("floor")
+    )
+    result = mongo.db.rooms.insert_one(room.to_dict())
     return jsonify({"message": "Room created successfully", "room_id": str(result.inserted_id)}), 201
 
 @api_bp.route("/rooms/<string:room_id>", methods=['PUT'])
+@token_required
 def update_room(room_id):
-    if decode:
-        data = request.get_json()
-        update_data = {
-            "name": data.get("name"),
-            "capacity": data.get("capacity"),
-            "facilities": data.get("facilities"),
-            "floor": data.get("floor"),
-            "is_active": data.get("is_active")
-        }
-        
-        mongo.db.rooms.update_one(
-            {"_id": ObjectId(room_id)},
-            {"$set": update_data}
-        )
+    data = request.get_json()
+    update_data = {
+        "name": data.get("name"),
+        "capacity": data.get("capacity"),
+        "facilities": data.get("facilities"),
+        "floor": data.get("floor"),
+        "is_active": data.get("is_active")
+    }
+    mongo.db.rooms.update_one(
+        {"_id": ObjectId(room_id)},
+        {"$set": update_data}
+    )
     return jsonify({"message": "Room updated successfully"})
 
 # Booking Routes with Validation
@@ -153,50 +181,46 @@ def validate_booking_time(start_time, end_time):
     return True, None
 
 @api_bp.route("/bookings", methods=['GET'])
+@token_required
 def get_bookings():
-    _decode = check_jwt()
-    if _decode:
-        user_bookings = mongo.db.bookings.find({})
-        print(user_bookings)
+    user_bookings = mongo.db.bookings.find({})
     return jsonify([Booking.from_dict(booking).to_dict() for booking in user_bookings])
 
 @api_bp.route("/bookings", methods=['POST'])
 def add_booking():
-    if decode:
-        data = request.get_json()
-        
-        # Validate booking time
-        is_valid, error_message = validate_booking_time(data["start_time"], data["end_time"])
-        if not is_valid:
-            return jsonify({"error": error_message}), 400
-        
-        # Check if room exists and is active
-        room = mongo.db.rooms.find({"_id": ObjectId(data["room_id"])    })
-        print(str(room))
-        if not room:
-            return jsonify({"error": "Room not found or inactive"}), 404
-        
-        # Check for booking conflicts
-        existing_booking = mongo.db.bookings.find_one({
-            "room_id": data["room_id"],
-            "start_time": {"$lt": data["end_time"]},
-            "end_time": {"$gt": data["start_time"]},
-            "status": "confirmed"
-        })
-        
-        if existing_booking:
-            return jsonify({"error": "Room is already booked for this time slot"}), 409
-        
-        booking = Booking(
-            user_id=ObjectId(current_user.get_id()),
-            room_id=data["room_id"],
-            start_time=datetime.fromisoformat(data["start_time"]),
-            end_time=datetime.fromisoformat(data["end_time"]),
-            purpose=data["purpose"],
-            attendees=data.get("attendees", [])
-        )
-        
-        result = mongo.db.bookings.insert_one(booking.to_dict())
+    data = request.get_json()
+    
+    # Validate booking time
+    is_valid, error_message = validate_booking_time(data["start_time"], data["end_time"])
+    if not is_valid:
+        return jsonify({"error": error_message}), 400
+    
+    # Check if room exists and is active
+    room = mongo.db.rooms.find({"_id": ObjectId(data["room_id"])    })
+    if not room:
+        return jsonify({"error": "Room not found or inactive"}), 404
+    
+    # Check for booking conflicts
+    existing_booking = mongo.db.bookings.find_one({
+        "room_id": data["room_id"],
+        "start_time": {"$lt": data["end_time"]},
+        "end_time": {"$gt": data["start_time"]},
+        "status": "confirmed"
+    })
+    
+    if existing_booking:
+        return jsonify({"error": "Room is already booked for this time slot"}), 409
+    
+    booking = Booking(
+        user_id=ObjectId(current_user.get_id()),
+        room_id=data["room_id"],
+        start_time=datetime.fromisoformat(data["start_time"]),
+        end_time=datetime.fromisoformat(data["end_time"]),
+        purpose=data["purpose"],
+        attendees=data.get("attendees", [])
+    )
+    
+    result = mongo.db.bookings.insert_one(booking.to_dict())
     return jsonify({"message": "Booking created successfully", "booking_id": str(result.inserted_id)}), 201
 
 @api_bp.route("/bookings/<string:booking_id>", methods=['PUT'])

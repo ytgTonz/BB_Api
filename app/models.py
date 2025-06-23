@@ -4,14 +4,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 
 class User(UserMixin):
-    def __init__(self, username, email, password=None, company=None, role="user", department=None):
+    def __init__(self, username, email, type, password=None, company=None, role="user", department=None):
         self.username = username
         self.email = email
         self.company = company
         self.role = role
         self.department = department
+        self.type = type
         if password:
             self.password_hash = generate_password_hash(password)
+        
 
     def get_id(self):
         return str(self._id)
@@ -25,7 +27,8 @@ class User(UserMixin):
             'email': self.email,
             'company': self.company,
             'role': self.role,
-            'department': self.department
+            'department': self.department,
+            'type': self.type,
         }
 
     @staticmethod
@@ -35,7 +38,8 @@ class User(UserMixin):
             email=data.get('email'),
             company=data.get('company'),
             role=data.get('role', 'user'),
-            department=data.get('department')
+            department=data.get('department'),
+            type = data.get('type')
         )
         if 'password_hash' in data:
             user.password_hash = data['password_hash']
