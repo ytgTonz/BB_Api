@@ -68,7 +68,7 @@ class Room:
             'floor': self.floor,
             'is_active': self.is_active,
             'created_at': self.created_at,
-            'user_id': self._id
+            'room_id': self._id
         }
 
     @staticmethod
