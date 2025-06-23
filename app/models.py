@@ -49,12 +49,16 @@ class User(UserMixin):
 
 class Room:
     def __init__(self, name, capacity, facilities=None, floor=None, is_active=True):
+        
         self.name = name
         self.capacity = capacity
         self.facilities = facilities or []
         self.floor = floor
         self.is_active = is_active
         self.created_at = datetime.now()
+
+    def get_id(self):
+        return str(self._id)
 
     def to_dict(self):
         return {
@@ -63,7 +67,8 @@ class Room:
             'facilities': self.facilities,
             'floor': self.floor,
             'is_active': self.is_active,
-            'created_at': self.created_at
+            'created_at': self.created_at,
+            'user_id': self._id
         }
 
     @staticmethod
@@ -77,6 +82,8 @@ class Room:
         )
         if 'created_at' in data:
             room.created_at = data['created_at']
+            if '_id' in data:
+              room._id = str(data['_id'])
         return room
 
 class Booking:
