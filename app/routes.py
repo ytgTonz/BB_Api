@@ -128,8 +128,8 @@ def update_profile():
 @api_bp.route("/rooms", methods=['GET'])
 @token_required
 def get_rooms():
-    rooms = mongo.db.rooms.find({"is_active": True})
-    return jsonify([Room.from_dict(rooms).to_dict() for room in rooms])
+    boardrooms = mongo.db.rooms.find({})
+    return jsonify([Room.from_dict(rooms).to_dict() for rooms in boardrooms])
 
 @api_bp.route("/rooms", methods=['POST'])
 @token_required
