@@ -129,7 +129,7 @@ def update_profile():
 @token_required
 def get_rooms():
     boardrooms = mongo.db.rooms.find({})
-    return jsonify([Room.from_dict(rooms).to_dict() for rooms in boardrooms])
+    return jsonify([Room.from_dict(room).to_dict() for room in boardrooms])
 
 @api_bp.route("/rooms", methods=['POST'])
 @token_required
@@ -184,6 +184,12 @@ def validate_booking_time(start_time, end_time):
 @token_required
 def get_bookings():
     user_bookings = mongo.db.bookings.find({})
+    return jsonify([Booking.from_dict(booking).to_dict() for booking in user_bookings])
+
+@api_bp.route("/bookings/<string:user_id>", methods = ['GET'])
+@token_required
+def get_user_bookings(user_id):
+    user_bookings = mongo.db.bookings.find({"user_id": user_id})
     return jsonify([Booking.from_dict(booking).to_dict() for booking in user_bookings])
 
 @api_bp.route("/bookings", methods=['POST'])

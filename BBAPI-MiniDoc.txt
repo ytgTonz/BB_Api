@@ -66,9 +66,7 @@ Body:
     "attendees": ["user1@example.com", "user2@example.com"]
 }
 
-(5)GET /api/bookings
-
-PUT /api/bookings/booking_id_here
+(5)PUT /api/bookings/booking_id_here
 Headers:
   Content-Type: application/json
 Body:
