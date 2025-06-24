@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint, g
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import  logout_user, current_user
 from bson.objectid import ObjectId
 from app.database import mongo
 from app.models import User, Booking, Room
@@ -36,10 +36,10 @@ def token_required(f):
 @api_bp.route("/register/user", methods=['POST'])
 def register_user():
     data = request.get_json()
-    
+    #check if user exists
     if mongo.db.users.find_one({"email": data["email"]}):
         return jsonify({"error": "Email already registered"}), 400
-    
+    #assign input to user obj
     user = User(
         username=data["username"],
         email=data["email"],
@@ -48,7 +48,7 @@ def register_user():
         department=data.get("department"),
         type = data.get("type")
     )
-    
+    #save obj to db
     result = mongo.db.users.insert_one(user.__dict__)
     return jsonify({"message": "User registered successfully", "user_id": str(result.inserted_id)}), 201
 
@@ -141,7 +141,7 @@ def create_room():
         facilities=data.get("facilities", []),
         floor=data.get("floor")
     )
-    result = mongo.db.rooms.insert_one(room.to_dict())
+    result = mongo.db.rooms.insert_one(room.__dict__)
     return jsonify({"message": "Room created successfully", "room_id": str(result.inserted_id)}), 201
 
 @api_bp.route("/rooms/<string:room_id>", methods=['PUT'])
@@ -165,10 +165,9 @@ def update_room(room_id):
 def validate_booking_time(start_time, end_time):
     start = datetime.fromisoformat(start_time)
     end = datetime.fromisoformat(end_time)
-    
-    # Check if booking is within business hours (9 AM to 6 PM)
-    business_start = time(9, 0)
-    business_end = time(18, 0)
+ # Check if booking is within business hours (9 AM to 6 PM)
+    business_start = time(7, 0)
+    business_end = time(16, 0)
     
     if start.time() < business_start or end.time() > business_end:
         return False, "Bookings must be within business hours (9 AM to 6 PM)"
@@ -218,15 +217,15 @@ def add_booking():
         return jsonify({"error": "Room is already booked for this time slot"}), 409
     
     booking = Booking(
-        user_id=ObjectId(current_user.get_id()),
+        user_id=data['user_id'],
         room_id=data["room_id"],
         start_time=datetime.fromisoformat(data["start_time"]),
         end_time=datetime.fromisoformat(data["end_time"]),
         purpose=data["purpose"],
         attendees=data.get("attendees", [])
     )
-    
-    result = mongo.db.bookings.insert_one(booking.to_dict())
+    print({"current_user_id": current_user.get_id()})
+    result = mongo.db.bookings.insert_one(booking.__dict__)
     return jsonify({"message": "Booking created successfully", "booking_id": str(result.inserted_id)}), 201
 
 @api_bp.route("/bookings/<string:booking_id>", methods=['PUT'])
@@ -237,7 +236,7 @@ def update_booking(booking_id):
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
     
-    if str(booking["user_id"]) != current_user.get_id() and current_user.role != "admin":
+    if str(booking["user_id"]) != data["user_id"]:
         return jsonify({"error": "Unauthorized"}), 403
     
     # Validate booking time if time is being updated
@@ -263,12 +262,14 @@ def update_booking(booking_id):
 
 @api_bp.route("/bookings/<string:booking_id>", methods=['DELETE'])
 def delete_booking(booking_id):
+
+    data = request.get_json()
     booking = mongo.db.bookings.find_one({"_id": ObjectId(booking_id)})
     
     if not booking:
         return jsonify({"error": "Booking not found"}), 404
     
-    if str(booking["user_id"]) != current_user.get_id() and current_user.role != "admin":
+    if str(booking["user_id"]) != data["user_id"]:
         return jsonify({"error": "Unauthorized"}), 403
     
     mongo.db.bookings.delete_one({"_id": ObjectId(booking_id)})

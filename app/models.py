@@ -106,6 +106,7 @@ class Booking:
             'attendees': self.attendees,
             'status': self.status,
             'created_at': self.created_at,
+            'booking_id': self._id
         }
     
     def get_id(self):
@@ -125,6 +126,6 @@ class Booking:
         )
         if 'created_at' in data:
             booking.created_at = data['created_at']
-            if '_id' in data:
+        if '_id' in data:
               booking._id = str(data['_id'])
         return booking 
