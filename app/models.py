@@ -106,7 +106,6 @@ class Booking:
             'attendees': self.attendees,
             'status': self.status,
             'created_at': self.created_at,
-            'booking_id': self._id
         }
     
     def get_id(self):
