@@ -217,7 +217,7 @@ def add_booking():
         return jsonify({"error": "Room is already booked for this time slot"}), 409
     
     booking = Booking(
-        user_id=data['user_id'],
+        user_id=data["user_id"],
         room_id=data["room_id"],
         start_time=datetime.fromisoformat(data["start_time"]),
         end_time=datetime.fromisoformat(data["end_time"]),
