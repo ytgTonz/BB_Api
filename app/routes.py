@@ -54,7 +54,7 @@ def register_user():
 
 @api_bp.route("register/admin", methods=['POST'])
 def register_admin():
-      data  = request.json()
+      data  = request.get_json()
       if mongo.db.users.find_one({"email": data["email"]}):
         return jsonify({"error": "Email already registered"}), 400
       
@@ -224,7 +224,7 @@ def add_booking():
         purpose=data["purpose"],
         attendees=data.get("attendees", [])
     )
-    print({"current_user_id": current_user.get_id()})
+    
     result = mongo.db.bookings.insert_one(booking.__dict__)
     return jsonify({"message": "Booking created successfully", "booking_id": str(result.inserted_id)}), 201
 

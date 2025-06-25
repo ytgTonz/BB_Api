@@ -2,46 +2,249 @@
 URL-Main: https://bb-api-lmgy.onrender.com
 
 # Routes:
-User Authentication:
-	Registration endpoint (POST /api/register)
-	Login endpoint (POST /api/login)	
-	Logout endpoint (GET /api/logout)
-Booking Management:
-	Get user's bookings (GET /api/bookings)
-	Create new booking (POST /api/bookings)
-	Update booking (PUT /api/bookings/<booking_id>)
-	Delete booking (DELETE /api/bookings/<booking_id>)
+
+  User Authentication:    
+    Registration endpoint (POST /api/register)
+    Login endpoint (POST /api/login)	
+    Logout endpoint (GET /api/logout)
+
+  Booking Management:
+      Get user's bookings (GET /api/bookings)
+      Get specific user bookings (GET /api/bookings/<user_id>)
+      Create new booking (POST /api/bookings)
+      Update booking (PUT /api/bookings/<booking_id>)
+      Delete booking (DELETE /api/bookings/<booking_id>)
+      
+  Room Management:
+      Get registered boardrooms (GET /rooms)
+      Register new boardroom (GET /rooms)
+      Update existing boardroom (PUT /rooms/<room_id>)
+
 
 Examples:
+
 (0)	POST /api/register/admin
-{
-    "username": "john manager",
-    "email": "john@admin.com",
-    "password": "secure_password",
-    "company": "Acme Corp"
-    "department": "IT"
-    "type": "Admin"
-}
+  Body:
+      {
+        "username": "john manager",
+        "email": "john@admin.com",
+        "password": "secure_password",
+        "company": "Acme Corp"
+        "department": "IT"
+      }
 
-(1)	POST /api/register/user
-{
-    "username": "john_doe",
-    "email": "john@example.com",
-    "password": "secure_password",
-    "company": "Acme Corp"
-    "department": "HR"
-    "type": "User"
-}
+  Repsonse:
+      {
+        "message": "User registered successfully",
+        "user_id": "685bb5728326ee8a5b68b360"
+      } 
 
+(1)	POST /api/register/admin
+  Body:
+      {
+        "username": "john manager",
+        "email": "john@user.com",
+        "password": "securepassowrd123",
+        "company": "Acme Corp"
+        "department": "CFO"
+      }
+
+  Repsonse:
+      {
+        "message": "User registered successfully",
+        "user_id": "685bb5728326ee8a5b68b360"
+      } 
 
 (2) POST /api/login
-Headers:
-  Content-Type: application/json
-Body:
-{
-    "email": "test@example.com",
-    "password": "password123"
-}
+  Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+  Body:
+      {
+          "email": "test@example.com",
+          "password": "password123"
+      }
+  Repsonse:
+      {
+        "jwt_token": "<jwt_token>",
+        "message": "Login successful",
+        "user_id": "685bb6978326ee8a5b68b361"
+      }    
+
+(3) GET /api/logout
+
+  Repsonse:
+      {
+        "message": "Logout successful"
+      }    
+
+(4) GET /api/bookings
+  Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+
+  Repsonse:
+      [
+          {
+              "attendees": [
+                  "youl@com.com"
+              ],
+              "booking_id": "685b9a356c4afbea3bd67bdc",
+              "created_at": "Wed, 25 Jun 2025 06:41:57 GMT",
+              "end_time": "Wed, 25 Jun 2025 09:41:00 GMT",
+              "purpose": "Lunch hour ",
+              "room_id": "68516e28958485aa2173f22d",
+              "start_time": "Wed, 25 Jun 2025 08:41:00 GMT",
+              "status": "confirmed",
+              "user_id": "6858fbba86fe518db6d514af"
+          },
+          {
+              "attendees": [
+                  "youl@com.com"
+              ],
+              "booking_id": "685b9a6a6c4afbea3bd67bdd",
+              "created_at": "Wed, 25 Jun 2025 06:42:50 GMT",
+              "end_time": "Wed, 25 Jun 2025 13:47:00 GMT",
+              "purpose": "Fun run ",
+              "room_id": "68516e28958485aa2173f22d",
+              "start_time": "Wed, 25 Jun 2025 12:46:00 GMT",
+              "status": "confirmed",
+              "user_id": "68550733293132edbf6313dc"
+          }
+      ]
+
+(5) GET /api/bookings/<user_id>
+  Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+
+  Repsonse:
+    [
+        {
+            "attendees": [
+                "youl@com.com"
+            ],
+            "booking_id": "685b96bb6c4afbea3bd67bdb",
+            "created_at": "Wed, 25 Jun 2025 06:27:07 GMT",
+            "end_time": "Wed, 25 Jun 2025 12:30:00 GMT",
+            "purpose": "Breakfast fun",
+            "room_id": "68516e28958485aa2173f22d",
+            "start_time": "Wed, 25 Jun 2025 10:28:00 GMT",
+            "status": "confirmed",
+            "user_id": "68550733293132edbf6313dc"
+        },
+        {
+            "attendees": [
+                "youl@com.com"
+            ],
+            "booking_id": "685b9a6a6c4afbea3bd67bdd",
+            "created_at": "Wed, 25 Jun 2025 06:42:50 GMT",
+            "end_time": "Wed, 25 Jun 2025 13:47:00 GMT",
+            "purpose": "Fun run ",
+            "room_id": "68516e28958485aa2173f22d",
+            "start_time": "Wed, 25 Jun 2025 12:46:00 GMT",
+            "status": "confirmed",
+            "user_id": "68550733293132edbf6313dc"
+        }
+    ]
+
+(6) POST /api/bookings
+  Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+  Body:
+      {
+        "room_id": "<room_id>",
+        "user_id": "<user_id>",
+        "start_time": "2024-03-20T10:00:00",
+        "end_time": "2024-03-20T11:00:00",
+        "purpose": "Team Meeting",
+        "attendees": ["user1@example.com", "user2@example.com"]
+      }
+  Repsonse:
+      [
+          {
+              "attendees": [
+                  "youl@com.com"
+              ],
+              "booking_id": "685b9a356c4afbea3bd67bdc",
+              "created_at": "Wed, 25 Jun 2025 06:41:57 GMT",
+              "end_time": "Wed, 25 Jun 2025 09:41:00 GMT",
+              "purpose": "Lunch hour ",
+              "room_id": "68516e28958485aa2173f22d",
+              "start_time": "Wed, 25 Jun 2025 08:41:00 GMT",
+              "status": "confirmed",
+              "user_id": "6858fbba86fe518db6d514af"
+          },
+          {
+              "attendees": [
+                  "youl@com.com"
+              ],
+              "booking_id": "685b9a6a6c4afbea3bd67bdd",
+              "created_at": "Wed, 25 Jun 2025 06:42:50 GMT",
+              "end_time": "Wed, 25 Jun 2025 13:47:00 GMT",
+              "purpose": "Fun run ",
+              "room_id": "68516e28958485aa2173f22d",
+              "start_time": "Wed, 25 Jun 2025 12:46:00 GMT",
+              "status": "confirmed",
+              "user_id": "68550733293132edbf6313dc"
+          }
+      ]
+
+(7) GET /api/bookings/<user_id>
+  Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+  Body:
+      {
+          "room_id": "<room_id>",
+          "user_id": "<user_id>",
+          "start_time": "2025-12-20T10:00:00",
+          "end_time": "2025-12-20T11:00:00",
+          "purpose": "Christmas Party",
+          "attendees": ["yola@hexuara.com", "Barry@nomadyq.com","sanele@riple.com"]
+      }
+  Repsonse:
+      {
+          
+        "booking_id": "<booking_id>",
+        "message": "Booking created successfully"
+      }
+
+Update booking (PUT /api/bookings/<booking_id>)
+
+(8) PUT /api/bookings/<booking_id>
+ Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+  Body:
+      {
+          "user_id": "<user_id>",
+          "start_time": "2025-12-20T10:00:00",
+          "end_time": "2025-12-20T11:00:00",
+          "purpose": "Christmas Party"
+      }
+  Repsonse:
+      {
+        "message": "Booking updated successfully"
+      }
+
+(9) DELETE /api/bookings/<booking_id>
+ Headers:
+     Content-Type: application/json
+     Authorization: Bearer Token: <jwt_token>
+  Body:
+      {
+          "user_id": "<user_id>"
+      }
+  Repsonse:
+      {
+        "message": "Booking deleted successfully"
+      }
+
+
+
+
 
 (3)POST /api/rooms
 Headers:
