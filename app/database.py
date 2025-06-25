@@ -1,12 +1,13 @@
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
+import os
 
 mongo = PyMongo()
 
 def init_db(app):
     try:
         # Configure MongoDB
-        app.config["MONGO_URI"] = "mongodb+srv://hamzaMaq:hamza_78674@cluster0.iewu6.mongodb.net/todo_db"
+        app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
         mongo.init_app(app)
         
         # Test the connection
