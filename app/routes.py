@@ -82,10 +82,10 @@ def login():
     chk_pass = user.check_password(data["password"])
     if not chk_pass:
         return jsonify({"error": "Invalid password"}), 401 
-    
+    user_id = user.get_id()
     encoded = jwt.encode({"email": data['email']}, SECRET_KEY, algorithm="HS256")
 
-    return jsonify({"message": "Login successful",  "jwt_token": encoded})
+    return jsonify({"message": "Login successful",  "jwt_token": encoded, "user_id": user_id})
 
 @api_bp.route("/logout")
 @token_required
