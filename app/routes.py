@@ -63,8 +63,7 @@ def register_admin():
         email=data["email"],
         password=data["password"],
         company=data.get("company"),
-        department=data.get("department"),
-        type = data.get("type")
+        department=data.get("department")
       )
       result = mongo.db.users.insert_one(admin.__dict__)
       return jsonify({"message": "Admin registered successfully", "user_id": str(result.inserted_id)}), 201    
