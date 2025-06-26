@@ -45,8 +45,7 @@ def register_user():
         email=data["email"],
         password=data["password"],
         company=data.get("company"),
-        department=data.get("department"),
-        type = data.get("type")
+        department=data.get("department")
     )
     #save obj to db
     result = mongo.db.users.insert_one(user.__dict__)
