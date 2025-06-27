@@ -256,7 +256,7 @@ def update_booking(booking_id):
         {"$set": update_data}
     )
     
-    return jsonify({"message": "Booking updated successfully"})
+    return jsonify({"message": "Booking updated successfully"}), 201
 
 @api_bp.route("/bookings/<string:booking_id>", methods=['DELETE'])
 def delete_booking(booking_id):
