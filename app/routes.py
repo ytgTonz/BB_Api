@@ -163,12 +163,12 @@ def update_room(room_id):
 def validate_booking_time(start_time, end_time):
     start = datetime.fromisoformat(start_time)
     end = datetime.fromisoformat(end_time)
- # Check if booking is within business hours (9 AM to 6 PM)
+ # Check if booking is within business hours (7 AM to 4 PM)
     business_start = time(7, 0)
     business_end = time(16, 0)
     
     if start.time() < business_start or end.time() > business_end:
-        return False, "Bookings must be within business hours (9 AM to 6 PM)"
+        return False, "Bookings must be within business hours (7 AM to 4 PM)"
     
     # Check if booking duration is between 30 minutes and 4 hours
     duration = end - start
